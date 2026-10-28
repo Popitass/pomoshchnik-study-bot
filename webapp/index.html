@@ -1,67 +1,54 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#11111b">
-  <title>Помощник</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    :root { color-scheme: dark; --bg:#11111b; --panel:#1b1b29; --muted:#a4a3b7; --accent:#9b7bff; }
-    * { box-sizing:border-box }
-    body { margin:0; padding:20px 16px 100px; background:var(--bg); color:#f7f6ff; font:16px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif; }
-    header { display:flex; align-items:center; gap:12px; margin:8px 0 22px; }
-    .logo { display:grid; place-items:center; width:52px; height:52px; border-radius:17px; background:linear-gradient(135deg,#a78bfa,#6d4aff); font-size:26px; }
-    h1 { margin:0; font-size:24px; } .subtitle { margin-top:4px; color:var(--muted); font-size:13px; }
-    .welcome { padding:18px; border-radius:22px; background:linear-gradient(135deg,#29223f,#1b1b29); border:1px solid #39314f; margin-bottom:22px; }
-    .welcome h2 { margin:0 0 8px; font-size:18px; } .welcome p { margin:0; color:#c8c3dd; line-height:1.45; font-size:14px; }
-    .section-title { margin:22px 2px 12px; font-size:15px; color:#d9d5ea; font-weight:700; }
-    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
-    .card { text-align:left; min-height:116px; border:1px solid #2c2b3d; border-radius:19px; padding:16px; background:var(--panel); color:inherit; }
-    .icon { font-size:25px; margin-bottom:13px; } .card strong { display:block; font-size:14px; } .card small { display:block; margin-top:5px; color:var(--muted); font-size:12px; line-height:1.3; }
-    .notice { color:var(--muted); font-size:12px; line-height:1.5; margin:22px 3px; }
-    nav { position:fixed; bottom:0; left:0; right:0; padding:12px 12px calc(12px + env(safe-area-inset-bottom)); background:#171722ee; backdrop-filter:blur(16px); border-top:1px solid #2d2c3d; display:flex; justify-content:space-around; }
-    nav button { border:0; background:none; color:var(--muted); font-size:11px; display:flex; flex-direction:column; align-items:center; gap:4px; }
-    nav span { font-size:20px; }
-    #message { margin-top:14px; color:#c5b7ff; font-size:13px; min-height:18px; }
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Помощник старосты</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#111117;--panel:#1c1c26;--muted:#a6a6b6;--purple:#8d6bff;--line:#30303c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f4f3fa;font:15px system-ui,-apple-system,sans-serif}header{padding:22px 18px 12px;background:linear-gradient(135deg,#242039,#15151e)}h1{font-size:22px;margin:0 0 6px}p{margin:6px 0;color:var(--muted)}main{padding:14px;max-width:760px;margin:auto}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;margin:10px 0}.row{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:12px;background:var(--purple);color:white;padding:12px 14px;font-weight:650;cursor:pointer}.btn.secondary{background:#2b2938;border:1px solid #403b55}.btn:disabled{opacity:.5}input,textarea,select{width:100%;background:#12121a;color:white;border:1px solid var(--line);padding:12px;border-radius:10px;margin:6px 0 10px;font:inherit}label{display:block;color:#ddd;font-size:13px;margin-top:8px}.nav{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.nav button{background:#252431;border:1px solid var(--line);color:#ddd;border-radius:12px;padding:12px 5px}.nav button.active{background:#392e5e;border-color:var(--purple)}.muted{color:var(--muted);font-size:13px}.item{border-top:1px solid var(--line);padding:10px 0}.hidden{display:none}.code{font-size:20px;letter-spacing:2px;color:#c9baff}.status{padding:9px 11px;background:#262334;border-radius:10px;color:#c9baff;margin:8px 0}.error{color:#ff9f9f}.success{color:#9ee5b0}
+</style>
 </head>
 <body>
-  <header>
-    <div class="logo">✦</div>
-    <div><h1>Помощник</h1><div class="subtitle">Панель управления группой</div></div>
-  </header>
-  <section class="welcome">
-    <h2>Всё для твоей группы 👋</h2>
-    <p>Учебные дела, расписание и полезная информация — в одном месте.</p>
-  </section>
-  <div class="section-title">Основное</div>
-  <main class="grid">
-    <button class="card" data-name="Студенты"><div class="icon">👥</div><strong>Студенты</strong><small>Список и управление группой</small></button>
-    <button class="card" data-name="Расписание"><div class="icon">🗓️</div><strong>Расписание</strong><small>Занятия и учебные дни</small></button>
-    <button class="card" data-name="Посещаемость"><div class="icon">✅</div><strong>Посещаемость</strong><small>Пропуски и отметки</small></button>
-    <button class="card" data-name="Журнал"><div class="icon">📒</div><strong>Журнал</strong><small>Записи и учебные заметки</small></button>
-    <button class="card" data-name="База знаний"><div class="icon">📚</div><strong>База знаний</strong><small>Материалы для группы</small></button>
-    <button class="card" data-name="Объявления"><div class="icon">📣</div><strong>Объявления</strong><small>Важная информация</small></button>
-  </main>
-  <div id="message"></div>
-  <p class="notice">Это первая рабочая версия интерфейса. Функции будут подключаться поэтапно; для точного совпадения с оригиналом будем сверять каждый экран с твоим видео.</p>
-  <nav>
-    <button data-name="Главная"><span>⌂</span>Главная</button>
-    <button data-name="Группа"><span>♧</span>Группа</button>
-    <button data-name="Журнал"><span>▤</span>Журнал</button>
-    <button data-name="Настройки"><span>⚙</span>Настройки</button>
-  </nav>
-  <script>
-    const tg = window.Telegram && window.Telegram.WebApp;
-    if (tg) { tg.ready(); tg.expand(); }
-    document.querySelectorAll('[data-name]').forEach(el => el.addEventListener('click', () => {
-      const name = el.dataset.name;
-      document.getElementById('message').textContent =
-        name === 'Главная' ? 'Ты уже на главной странице.' :
-        `Раздел «${name}» подготовлен для подключения. Следующим этапом добавим его функции.`;
-      if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-    }));
-  </script>
-</body>
-</html>
+<header><h1>Помощник старосты</h1><p>Группа, расписание и посещаемость в одном месте</p></header>
+<main>
+<div id="notice" class="status">Подключаемся к Telegram…</div>
+<div id="profile" class="card"><strong>Загрузка профиля</strong><p>Пожалуйста, подождите.</p></div>
+<div class="nav">
+<button class="active" data-page="groups">Группы</button><button data-page="students">Студенты</button><button data-page="schedule">Расписание</button>
+<button data-page="journal">Журнал</button><button data-page="announcements">Объявления</button><button data-page="materials">Материалы</button>
+</div>
+<section id="page-groups" class="page">
+<div class="card"><h3>Создать группу</h3><label>Название группы</label><input id="groupName" placeholder="Например, ИВТ-21"><button class="btn" id="createGroup">Создать группу</button></div>
+<div class="card"><h3>Вступить по коду</h3><label>Код приглашения</label><input id="joinCode" placeholder="8 символов"><button class="btn secondary" id="joinGroup">Вступить</button></div>
+<div class="card"><h3>Мои группы</h3><div id="groupsList" class="muted">Пока групп нет.</div></div>
+<div class="card hidden" id="groupInfo"></div>
+</section>
+<section id="page-students" class="page hidden"><div class="card"><h3>Студенты</h3><p>Выбери группу на вкладке «Группы».</p><div id="studentsList"></div></div></section>
+<section id="page-schedule" class="page hidden"><div class="card"><h3>Добавить занятие</h3><label>Предмет</label><input id="subject" placeholder="Математика"><label>Дата и время</label><input id="startsAt" type="datetime-local"><label>Опрос за сколько минут</label><input id="pollBefore" type="number" min="1" max="180" value="15"><button class="btn" id="createLesson">Сохранить занятие</button></div><div class="card"><h3>Расписание</h3><div id="lessonsList" class="muted">Выбери группу.</div></div></section>
+<section id="page-journal" class="page hidden"><div class="card"><h3>Журнал посещаемости</h3><p>Отметки сохраняются в базе.</p><div id="journalList" class="muted">Выбери группу.</div></div></section>
+<section id="page-announcements" class="page hidden"><div class="card"><h3>Новое объявление</h3><label>Заголовок</label><input id="announcementTitle"><label>Текст</label><textarea id="announcementBody" rows="3"></textarea><button class="btn" id="createAnnouncement">Опубликовать</button></div><div class="card"><h3>Объявления</h3><div id="announcementsList"></div></div></section>
+<section id="page-materials" class="page hidden"><div class="card"><h3>Добавить материал</h3><label>Название</label><input id="materialTitle"><label>Ссылка</label><input id="materialUrl" placeholder="https://..."><button class="btn" id="createMaterial">Сохранить материал</button></div><div class="card"><h3>Материалы</h3><div id="materialsList"></div></div></section>
+</main>
+<script>
+const tg=window.Telegram?.WebApp; if(tg){tg.ready();tg.expand()}
+const initData=tg?.initData||'';
+let groups=[],activeGroup=null,me=null,details=null;
+const $=id=>document.getElementById(id);
+function note(msg,error=false){$('notice').textContent=msg;$('notice').className='status '+(error?'error':'success')}
+async function api(path,options={}){if(!initData)throw new Error('Открой приложение через кнопку «Открыть» в Telegram, а не по прямой ссылке.');const res=await fetch(path,{...options,headers:{'Content-Type':'application/json','X-Telegram-Init-Data':initData,...options.headers}});let data={};try{data=await res.json()}catch{}if(!res.ok)throw new Error(data.detail||('Ошибка '+res.status));return data}
+function showPage(page){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));$('page-'+page).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page))}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function dt(s){try{return new Date(s).toLocaleString()}catch{return s}}
+function renderGroups(){ $('groupsList').innerHTML=groups.length?groups.map(g=>`<div class="item"><strong>${esc(g.name)}</strong><p>${g.role==='representative'?'Староста':'Студент'} · код <span class="code">${esc(g.invite_code)}</span></p><button class="btn secondary" onclick="selectGroup(${g.id})">Открыть</button></div>`).join(''):'<p>Пока групп нет. Создай группу или вступи по коду.</p>'}
+async function refresh(){const d=await api('/api/me');me=d.user;groups=d.groups; $('profile').innerHTML=`<strong>${esc(me.first_name||'Пользователь')}</strong><p>@${esc(me.username||'без username')} · Telegram ID ${me.id}</p>`;renderGroups();if(activeGroup)await selectGroup(activeGroup.id)}
+window.selectGroup=async id=>{activeGroup=groups.find(g=>g.id===id)||null;if(!activeGroup)return;details=await api('/api/groups/'+id);$('groupInfo').classList.remove('hidden');$('groupInfo').innerHTML=`<h3>${esc(details.group.name)}</h3><p>Код приглашения</p><div class="code">${esc(details.group.invite_code)}</div><p class="muted">Передай код студентам для вступления.</p>`;$('studentsList').innerHTML=details.members.map(m=>`<div class="item">${esc(m.first_name||m.username||m.telegram_id)} <span class="muted">· ${esc(m.role)}</span></div>`).join('');$('lessonsList').innerHTML=details.lessons.map(l=>`<div class="item"><strong>${esc(l.subject)}</strong><p>${dt(l.starts_at)} · опрос за ${l.poll_minutes_before} мин.</p></div>`).join('')||'<p>Занятий пока нет.</p>';$('announcementsList').innerHTML=details.announcements.map(a=>`<div class="item"><strong>${esc(a.title)}</strong><p>${esc(a.body)}</p></div>`).join('')||'<p>Объявлений пока нет.</p>';$('materialsList').innerHTML=details.materials.map(m=>`<div class="item"><a href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.title)}</a></div>`).join('')||'<p>Материалов пока нет.</p>';const att=await api('/api/groups/'+id+'/attendance');$('journalList').innerHTML=att.attendance.map(a=>`<div class="item">${esc(a.subject)} · ${dt(a.starts_at)}<p>${esc(a.telegram_id)} — ${esc(a.status)}</p></div>`).join('')||'<p>Отметок пока нет.</p>';note('Группа загружена из базы.')}
+$('createGroup').onclick=async()=>{try{const d=await api('/api/groups',{method:'POST',body:JSON.stringify({name:$('groupName').value})});$('groupName').value='';await refresh();await selectGroup(d.group.id);note('Группа создана и сохранена.')}catch(e){note(e.message,true)}};
+$('joinGroup').onclick=async()=>{try{await api('/api/groups/join',{method:'POST',body:JSON.stringify({invite_code:$('joinCode').value})});$('joinCode').value='';await refresh();note('Ты вступил в группу.')}catch(e){note(e.message,true)}};
+$('createLesson').onclick=async()=>{try{if(!activeGroup)throw new Error('Сначала открой группу.');const v=$('startsAt').value;if(!v)throw new Error('Укажи дату и время.');await api('/api/lessons',{method:'POST',body:JSON.stringify({group_id:activeGroup.id,subject:$('subject').value,starts_at:new Date(v).toISOString(),poll_minutes_before:Number($('pollBefore').value||15)})});$('subject').value='';await selectGroup(activeGroup.id);note('Занятие сохранено.')}catch(e){note(e.message,true)}};
+$('createAnnouncement').onclick=async()=>{try{if(!activeGroup)throw new Error('Сначала открой группу.');await api('/api/announcements',{method:'POST',body:JSON.stringify({group_id:activeGroup.id,title:$('announcementTitle').value,body:$('announcementBody').value})});$('announcementTitle').value='';$('announcementBody').value='';await selectGroup(activeGroup.id);note('Объявление опубликовано.')}catch(e){note(e.message,true)}};
+$('createMaterial').onclick=async()=>{try{if(!activeGroup)throw new Error('Сначала открой группу.');await api('/api/materials',{method:'POST',body:JSON.stringify({group_id:activeGroup.id,title:$('materialTitle').value,url:$('materialUrl').value})});$('materialTitle').value='';$('materialUrl').value='';await selectGroup(activeGroup.id);note('Материал сохранён.')}catch(e){note(e.message,true)}};
+(async()=>{try{if(!initData){note('Открой Mini App через Telegram, чтобы подтвердить аккаунт.',true);$('profile').innerHTML='<strong>Нужен запуск из Telegram</strong><p>Открой бота и нажми «Открыть».</p>';return}await refresh();note('Подключено к серверу и базе данных.')}catch(e){note(e.message,true);$('profile').innerHTML='<strong>Не удалось загрузить профиль</strong><p>'+esc(e.message)+'</p>'}})();
+</script>
+</body></html>
