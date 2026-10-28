@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#11111b">
+  <title>Помощник</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root { color-scheme: dark; --bg:#11111b; --panel:#1b1b29; --muted:#a4a3b7; --accent:#9b7bff; }
+    * { box-sizing:border-box }
+    body { margin:0; padding:20px 16px 100px; background:var(--bg); color:#f7f6ff; font:16px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif; }
+    header { display:flex; align-items:center; gap:12px; margin:8px 0 22px; }
+    .logo { display:grid; place-items:center; width:52px; height:52px; border-radius:17px; background:linear-gradient(135deg,#a78bfa,#6d4aff); font-size:26px; }
+    h1 { margin:0; font-size:24px; } .subtitle { margin-top:4px; color:var(--muted); font-size:13px; }
+    .welcome { padding:18px; border-radius:22px; background:linear-gradient(135deg,#29223f,#1b1b29); border:1px solid #39314f; margin-bottom:22px; }
+    .welcome h2 { margin:0 0 8px; font-size:18px; } .welcome p { margin:0; color:#c8c3dd; line-height:1.45; font-size:14px; }
+    .section-title { margin:22px 2px 12px; font-size:15px; color:#d9d5ea; font-weight:700; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+    .card { text-align:left; min-height:116px; border:1px solid #2c2b3d; border-radius:19px; padding:16px; background:var(--panel); color:inherit; }
+    .icon { font-size:25px; margin-bottom:13px; } .card strong { display:block; font-size:14px; } .card small { display:block; margin-top:5px; color:var(--muted); font-size:12px; line-height:1.3; }
+    .notice { color:var(--muted); font-size:12px; line-height:1.5; margin:22px 3px; }
+    nav { position:fixed; bottom:0; left:0; right:0; padding:12px 12px calc(12px + env(safe-area-inset-bottom)); background:#171722ee; backdrop-filter:blur(16px); border-top:1px solid #2d2c3d; display:flex; justify-content:space-around; }
+    nav button { border:0; background:none; color:var(--muted); font-size:11px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+    nav span { font-size:20px; }
+    #message { margin-top:14px; color:#c5b7ff; font-size:13px; min-height:18px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">✦</div>
+    <div><h1>Помощник</h1><div class="subtitle">Панель управления группой</div></div>
+  </header>
+  <section class="welcome">
+    <h2>Всё для твоей группы 👋</h2>
+    <p>Учебные дела, расписание и полезная информация — в одном месте.</p>
+  </section>
+  <div class="section-title">Основное</div>
+  <main class="grid">
+    <button class="card" data-name="Студенты"><div class="icon">👥</div><strong>Студенты</strong><small>Список и управление группой</small></button>
+    <button class="card" data-name="Расписание"><div class="icon">🗓️</div><strong>Расписание</strong><small>Занятия и учебные дни</small></button>
+    <button class="card" data-name="Посещаемость"><div class="icon">✅</div><strong>Посещаемость</strong><small>Пропуски и отметки</small></button>
+    <button class="card" data-name="Журнал"><div class="icon">📒</div><strong>Журнал</strong><small>Записи и учебные заметки</small></button>
+    <button class="card" data-name="База знаний"><div class="icon">📚</div><strong>База знаний</strong><small>Материалы для группы</small></button>
+    <button class="card" data-name="Объявления"><div class="icon">📣</div><strong>Объявления</strong><small>Важная информация</small></button>
+  </main>
+  <div id="message"></div>
+  <p class="notice">Это первая рабочая версия интерфейса. Функции будут подключаться поэтапно; для точного совпадения с оригиналом будем сверять каждый экран с твоим видео.</p>
+  <nav>
+    <button data-name="Главная"><span>⌂</span>Главная</button>
+    <button data-name="Группа"><span>♧</span>Группа</button>
+    <button data-name="Журнал"><span>▤</span>Журнал</button>
+    <button data-name="Настройки"><span>⚙</span>Настройки</button>
+  </nav>
+  <script>
+    const tg = window.Telegram && window.Telegram.WebApp;
+    if (tg) { tg.ready(); tg.expand(); }
+    document.querySelectorAll('[data-name]').forEach(el => el.addEventListener('click', () => {
+      const name = el.dataset.name;
+      document.getElementById('message').textContent =
+        name === 'Главная' ? 'Ты уже на главной странице.' :
+        `Раздел «${name}» подготовлен для подключения. Следующим этапом добавим его функции.`;
+      if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }));
+  </script>
+</body>
+</html>
