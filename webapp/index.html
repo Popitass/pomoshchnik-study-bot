@@ -36,7 +36,32 @@ const initData=tg?.initData||'';
 let groups=[],activeGroup=null,me=null,details=null;
 const $=id=>document.getElementById(id);
 function note(msg,error=false){if(!error){$('notice').classList.add('hidden');return}$('notice').classList.remove('hidden');$('notice').textContent=msg;$('notice').className='status error'}
-async function api(path,options={}){if(!initData)throw new Error('Открой приложение через кнопку «Открыть» в Telegram, а не по прямой ссылке.');const res=await fetch(path,{...options,headers:{'Content-Type':'application/json','X-Telegram-Init-Data':initData,...options.headers}});let data={};try{data=await res.json()}catch{}if(!res.ok)throw new Error(data.detail||('Ошибка '+res.status));return data}
+async function api(path,options={}){
+  if(!initData) throw new Error('Открой приложение через кнопку «Открыть» в Telegram, а не по прямой ссылке.');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    const res = await fetch(path, {
+      ...options,
+      signal: controller.signal,
+      headers: {'Content-Type':'application/json','X-Telegram-Init-Data':initData,...options.headers}
+    });
+    let data={};
+    try { data=await res.json(); } catch {}
+    if(!res.ok) {
+      const detail = data && data.detail;
+      throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail || ('Ошибка '+res.status)));
+    }
+    return data;
+  } catch (error) {
+    if (error && error.name === 'AbortError') {
+      throw new Error('Сервер не ответил за 15 секунд. Проверь Render → Logs и попробуй ещё раз.');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 function showPage(page){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));$('page-'+page).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page))}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -83,6 +108,7 @@ window.selectGroup = async id => {
     $('groupInfo').classList.remove('hidden');
     $('groupInfo').innerHTML =
       `<h3>${esc(details.group.name || 'Группа')}</h3><p>Код приглашения</p><div class="code">${esc(details.group.invite_code || '—')}</div><p class="muted">Передай код студентам для вступления.</p>`;
+    $('groupInfo').scrollIntoView({behavior:'smooth', block:'start'});
 
     $('studentsList').innerHTML = (details.members || [])
       .map(m => `<div class="item">${esc(m.first_name || m.username || m.telegram_id || 'Студент')} <span class="muted">· ${esc(m.role || 'student')}</span></div>`)
