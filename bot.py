@@ -166,6 +166,10 @@ async def lifespan(app: FastAPI):
                     )
                 """))
                 await conn.execute(text("""
+        ALTER TABLE attendance
+        ADD COLUMN IF NOT EXISTS lesson_id BIGINT REFERENCES lessons(id) ON DELETE CASCADE
+        """))                
+                await conn.execute(text("""
                     CREATE TABLE IF NOT EXISTS announcements (
                         id BIGSERIAL PRIMARY KEY,
                         group_id BIGINT NOT NULL REFERENCES study_groups(id) ON DELETE CASCADE,
