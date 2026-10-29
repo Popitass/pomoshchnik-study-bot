@@ -41,59 +41,84 @@ function showPage(page){document.querySelectorAll('.page').forEach(x=>x.classLis
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function dt(s){try{return new Date(s).toLocaleString()}catch{return s}}
-function renderGroups(){ $('groupsList').innerHTML=groups.length?groups.map(g=>`<div class="item"><strong>${esc(g.name)}</strong><p>${g.role==='representative'?'Староста':'Студент'} · код <span class="code">${esc(g.invite_code)}</span></p><button class="btn secondary" onclick="selectGroup(${g.id})">Открыть</button></div>`).join(''):'<p>Пока групп нет. Создай группу или вступи по коду.</p>'}
+function renderGroups(){
+  const list = $('groupsList');
+  list.innerHTML = groups.length
+    ? groups.map(g => `<div class="item"><strong>${esc(g.name)}</strong><p>${g.role==='representative'?'Староста':'Студент'} · код <span class="code">${esc(g.invite_code)}</span></p><button type="button" class="btn secondary open-group-btn" data-group-id="${Number(g.id)}">Открыть</button></div>`).join('')
+    : '<p>Пока групп нет. Создай группу или вступи по коду.</p>';
+  list.querySelectorAll('.open-group-btn').forEach(button => {
+    button.addEventListener('click', async () => {
+      const id = Number(button.dataset.groupId);
+      button.disabled = true;
+      const oldText = button.textContent;
+      button.textContent = 'Открываем…';
+      try {
+        await window.selectGroup(id);
+      } catch (error) {
+        console.error('Не удалось открыть группу:', error);
+        note(error && error.message ? error.message : String(error), true);
+      } finally {
+        button.disabled = false;
+        button.textContent = oldText;
+      }
+    });
+  });
+}
 async function refresh(){const d=await api('/api/me');me=d.user;groups=d.groups; $('profile').innerHTML=`<strong>${esc(me.first_name||'Пользователь')}</strong><p>@${esc(me.username||'без username')} · Telegram ID ${me.id}</p>`;renderGroups();if(activeGroup)await selectGroup(activeGroup.id)}
 window.selectGroup = async id => {
   try {
-    activeGroup = groups.find(g => g.id === id) || null;
-
+    const numericId = Number(id);
+    activeGroup = groups.find(g => Number(g.id) === numericId) || null;
     if (!activeGroup) {
-      throw new Error('Группа не найдена. Обнови список групп.');
+      throw new Error('Группа не найдена. Обнови список групп и попробуй снова.');
     }
 
-    details = await api('/api/groups/' + id);
-
-    if (!details || !details.group) {
+    note('Загружаю группу…');
+    const loaded = await api('/api/groups/' + numericId);
+    if (!loaded || !loaded.group) {
       throw new Error('Сервер не вернул данные группы.');
     }
+    details = loaded;
 
     $('groupInfo').classList.remove('hidden');
     $('groupInfo').innerHTML =
-      `<h3>${esc(details.group.name)}</h3>
-       <p>Код приглашения</p>
-       <div class="code">${esc(details.group.invite_code)}</div>
-       <p class="muted">Передай код студентам для вступления.</p>`;
+      `<h3>${esc(details.group.name || 'Группа')}</h3><p>Код приглашения</p><div class="code">${esc(details.group.invite_code || '—')}</div><p class="muted">Передай код студентам для вступления.</p>`;
 
     $('studentsList').innerHTML = (details.members || [])
-      .map(m => `<div class="item">${esc(m.first_name || m.username || m.telegram_id)} <span class="muted">· ${esc(m.role)}</span></div>`)
+      .map(m => `<div class="item">${esc(m.first_name || m.username || m.telegram_id || 'Студент')} <span class="muted">· ${esc(m.role || 'student')}</span></div>`)
       .join('') || '<p>Студентов пока нет.</p>';
 
     $('lessonsList').innerHTML = (details.lessons || [])
-      .map(l => `<div class="item"><strong>${esc(l.subject)}</strong><p>${dt(l.starts_at)} · опрос за ${l.poll_minutes_before} мин.</p></div>`)
+      .map(l => `<div class="item"><strong>${esc(l.subject || 'Занятие')}</strong><p>${dt(l.starts_at)} · опрос за ${esc(l.poll_minutes_before ?? 15)} мин.</p></div>`)
       .join('') || '<p>Занятий пока нет.</p>';
 
     $('announcementsList').innerHTML = (details.announcements || [])
-      .map(a => `<div class="item"><strong>${esc(a.title)}</strong><p>${esc(a.body)}</p></div>`)
+      .map(a => `<div class="item"><strong>${esc(a.title || 'Объявление')}</strong><p>${esc(a.body || '')}</p></div>`)
       .join('') || '<p>Объявлений пока нет.</p>';
 
     $('materialsList').innerHTML = (details.materials || [])
-      .map(m => `<div class="item"><a href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.title)}</a></div>`)
+      .map(m => `<div class="item"><a href="${esc(m.url || '#')}" target="_blank" rel="noopener">${esc(m.title || m.url || 'Материал')}</a></div>`)
       .join('') || '<p>Материалов пока нет.</p>';
 
-    const att = await api('/api/groups/' + id + '/attendance');
-
-    $('journalList').innerHTML = (att.attendance || [])
-      .map(a => `<div class="item">${esc(a.subject)} · ${dt(a.starts_at)}<p>${esc(a.telegram_id)} — ${esc(a.status)}</p></div>`)
+    const attendanceData = await api('/api/groups/' + numericId + '/attendance');
+    const attendance = attendanceData && Array.isArray(attendanceData.attendance)
+      ? attendanceData.attendance : [];
+    $('journalList').innerHTML = attendance
+      .map(a => `<div class="item">${esc(a.subject || 'Занятие')} · ${dt(a.starts_at)}<p>${esc(a.telegram_id || '')} — ${esc(a.status || 'не отмечено')}</p></div>`)
       .join('') || '<p>Отметок пока нет.</p>';
 
-  } catch (e) {
-    console.error('Ошибка открытия группы:', e);
-    const message = e && e.message
-      ? e.message
-      : String(e || 'Неизвестная ошибка при открытии группы');
+    note('Группа открыта.');
+    return details;
+  } catch (error) {
+    console.error('Ошибка открытия группы:', error);
+    const message = error && error.message
+      ? error.message
+      : String(error || 'Неизвестная ошибка при открытии группы');
     note(message, true);
+    throw error;
   }
-};$('createGroup').onclick=async()=>{try{const d=await api('/api/groups',{method:'POST',body:JSON.stringify({name:$('groupName').value})});$('groupName').value='';await refresh();await selectGroup(d.group.id);note('Группа создана и сохранена.')}catch(e){note(e.message,true)}};
+};
+$('createGroup').onclick=async()=>{try{const d=await api('/api/groups',{method:'POST',body:JSON.stringify({name:$('groupName').value})});$('groupName').value='';await refresh();await selectGroup(d.group.id);note('Группа создана и сохранена.')}catch(e){note(e.message,true)}};
 $('joinGroup').onclick=async()=>{try{await api('/api/groups/join',{method:'POST',body:JSON.stringify({invite_code:$('joinCode').value})});$('joinCode').value='';await refresh();note('Ты вступил в группу.')}catch(e){note(e.message,true)}};
 $('createLesson').onclick=async()=>{try{if(!activeGroup)throw new Error('Сначала открой группу.');const v=$('startsAt').value;if(!v)throw new Error('Укажи дату и время.');await api('/api/lessons',{method:'POST',body:JSON.stringify({group_id:activeGroup.id,subject:$('subject').value,starts_at:new Date(v).toISOString(),poll_minutes_before:Number($('pollBefore').value||15)})});$('subject').value='';await selectGroup(activeGroup.id);note('Занятие сохранено.')}catch(e){note(e.message,true)}};
 $('createAnnouncement').onclick=async()=>{try{if(!activeGroup)throw new Error('Сначала открой группу.');await api('/api/announcements',{method:'POST',body:JSON.stringify({group_id:activeGroup.id,title:$('announcementTitle').value,body:$('announcementBody').value})});$('announcementTitle').value='';$('announcementBody').value='';await selectGroup(activeGroup.id);note('Объявление опубликовано.')}catch(e){note(e.message,true)}};
