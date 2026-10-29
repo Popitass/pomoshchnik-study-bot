@@ -165,10 +165,12 @@ async def lifespan(app: FastAPI):
                         UNIQUE (lesson_id, telegram_id)
                     )
                 """))
+                # Миграция для баз, где attendance была создана старой версией кода.
+                # CREATE TABLE IF NOT EXISTS не добавляет новые столбцы в существующую таблицу.
                 await conn.execute(text("""
-        ALTER TABLE attendance
-        ADD COLUMN IF NOT EXISTS lesson_id BIGINT REFERENCES lessons(id) ON DELETE CASCADE
-        """))                
+                    ALTER TABLE attendance
+                    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                """))
                 await conn.execute(text("""
                     CREATE TABLE IF NOT EXISTS announcements (
                         id BIGSERIAL PRIMARY KEY,
